@@ -1,0 +1,92 @@
+############################################################################
+# nuttx-configs/Make.defs
+#
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+
+CC = /home/rain-2/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-gcc
+CXX = /home/rain-2/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-g++
+CPP = /home/rain-2/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-gcc -E
+LD = /home/rain-2/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-ld
+AR = /home/rain-2/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-ar rcs
+NM = /home/rain-2/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-nm
+OBJCOPY = /home/rain-2/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-objcopy
+OBJDUMP = /home/rain-2/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-objdump
+
+# Include paths with Cygwin path conversion
+ifneq (, $(findstring CYGWIN, $(shell uname)))
+  WINTOOL = y
+  PX4INCLUDES = -I"$(shell cygpath -w /home/rain-2/THU9-314/src1.8.0/THU9-314-v1.8.0-repertory/THU9-314-v1.8.0-origin/src/include)"
+  ARCHINCLUDES = $(PX4INCLUDES) -I. -isystem "$(shell cygpath -w $(TOPDIR)/include)"
+  ARCHXXINCLUDES = $(ARCHINCLUDES) -isystem "$(shell cygpath -w $(TOPDIR)/include/cxx)"
+else
+  PX4INCLUDES = -I/home/rain-2/THU9-314/src1.8.0/THU9-314-v1.8.0-repertory/THU9-314-v1.8.0-origin/src/include
+  ARCHINCLUDES = $(PX4INCLUDES) -I. -isystem $(TOPDIR)/include
+  ARCHXXINCLUDES = $(ARCHINCLUDES) -isystem $(TOPDIR)/include/cxx
+endif
+
+# Windows toolchain (MSYS & Cygwin) symbolic link handling
+ifeq ($(WINTOOL),y)
+  DIRLINK = $(TOPDIR)/tools/copydir.sh
+  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
+  MKDEP = $(TOPDIR)/tools/mknulldeps.sh
+endif
+
+CFLAGS = -Os -g2 -fno-common -ffunction-sections -fdata-sections -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard -fno-common -ffunction-sections -fdata-sections -g -std=gnu99 -fno-common -Wall -Wextra -Warray-bounds -Wdisabled-optimization -Wdouble-promotion -Wfatal-errors -Wfloat-equal -Wformat-security -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-field-initializers -Wpointer-arith -Wshadow -Wuninitialized -Wunknown-pragmas -Wunused-variable -Wno-implicit-fallthrough -Wno-missing-include-dirs -Wno-unused-parameter -Wunused-but-set-variable -Wformat=1 -Wbad-function-cast -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -fvisibility=hidden -include visibility.h -fno-strict-aliasing -fomit-frame-pointer -fno-math-errno -funsafe-math-optimizations -ffunction-sections -fdata-sections -fno-strength-reduce -fno-builtin-printf $(ARCHINCLUDES) \
+	-Wno-bad-function-cast \
+	-Wno-cpp \
+	-Wno-float-equal \
+	-Wno-format-truncation \
+	-Wno-implicit-fallthrough \
+	-Wno-implicit-function-declaration \
+	-Wno-logical-op \
+	-Wno-maybe-uninitialized \
+	-Wno-missing-declarations \
+	-Wno-missing-field-initializers \
+	-Wno-missing-prototypes \
+	-Wno-nested-externs \
+	-Wno-nonnull-compare \
+	-Wno-old-style-declaration \
+	-Wno-sign-compare \
+	-Wno-type-limits
+
+CXXFLAGS = -Os -g2 -fno-common -ffunction-sections -fdata-sections -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard -fno-common -ffunction-sections -fdata-sections -g -fno-exceptions -fno-rtti -std=gnu++11 -fno-threadsafe-statics -DCONFIG_WCHAR_BUILTIN -D__CUSTOM_FILE_IO__ -fcheck-new -Wall -Wextra -Warray-bounds -Wdisabled-optimization -Wdouble-promotion -Wfatal-errors -Wfloat-equal -Wformat-security -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-field-initializers -Wpointer-arith -Wshadow -Wuninitialized -Wunknown-pragmas -Wunused-variable -Wno-implicit-fallthrough -Wno-missing-include-dirs -Wno-unused-parameter -Wunused-but-set-variable -Wformat=1 -Wno-overloaded-virtual -Wreorder -Wno-format-truncation -fvisibility=hidden -include visibility.h -fno-strict-aliasing -fomit-frame-pointer -fno-math-errno -funsafe-math-optimizations -ffunction-sections -fdata-sections -fno-strength-reduce -fno-builtin-printf $(ARCHXXINCLUDES) \
+	-fcheck-new \
+	-fno-builtin \
+	-Wno-double-promotion \
+	-Wno-maybe-uninitialized \
+	-Wno-missing-declarations
+
+AFLAGS = $(CFLAGS) -D__ASSEMBLY__

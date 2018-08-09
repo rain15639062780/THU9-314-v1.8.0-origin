@@ -44,6 +44,9 @@
 
 #define ARSP_YAW_CTRL_DISABLE 7.0f	// airspeed at which we stop controlling yaw during a front transition
 
+
+//rain test
+
 Tiltrotor::Tiltrotor(VtolAttitudeControl *attc) :
 	VtolType(attc),
 	_tilt_control(0.0f)
